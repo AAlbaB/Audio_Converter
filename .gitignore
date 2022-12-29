@@ -1,0 +1,15 @@
+#Entornos virtuales
+venv/
+
+#Bases de datos y archivos de audio
+*.db
+*.mp3
+*.wav
+*.ogg
+
+#Archvivos temporales
+*.pyc
+
+#Logs
+log_login.txt
+log_convert.txt
