@@ -4,8 +4,8 @@ from flask_cors import CORS
 from flask_restful import Api
 from flask_jwt_extended import JWTManager
 from dotenv import load_dotenv 
-from api.modelos import db
-from api.vistas import VistaUser, VistaUsers, VistaSignUp, VistaLogIn, \
+from api.models import db
+from api.views import VistaUser, VistaUsers, VistaSignUp, VistaLogIn, \
                         VistaTask, VistaTasksUser, VistaFiles
 
 load_dotenv()

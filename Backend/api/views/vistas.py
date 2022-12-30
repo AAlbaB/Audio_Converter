@@ -7,14 +7,14 @@ from dotenv import load_dotenv
 from flask_restful import Resource
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 from flask import request, send_file
-from ..modelos import db, User, UserSchema, File, FileSchema
+from ..models import db, User, UserSchema, Task, TaskSchema
 from werkzeug.utils import secure_filename
 from ..utils import validate_password
 
 load_dotenv()
 celery_app = Celery('__name__', broker = os.getenv('BROKER_URL'))
 user_schema = UserSchema()
-file_schema = FileSchema()
+file_schema = TaskSchema()
 
 RUTA_CONVERTIDA = os.getcwd() + '/files/convertido' 
 RUTA_ORIGINALES = os.getcwd() + '/files/originales'
@@ -185,7 +185,7 @@ class VistaTasksUser(Resource):
             except:
                 return {'mensaje':'Error: al almacenar archivo original'}
 
-            new_task = File(timeStamp = date_actual,
+            new_task = Task(timeStamp = date_actual,
                             fileName = file_origen, 
                             newFormat = new_format,
                             pathOriginal = path_origen,
@@ -221,12 +221,12 @@ class VistaTasksUser(Resource):
         if order not in (0, 1): 
             return {'mensaje':'El valor numerico pasado en order debe ser (0 o 1)'}, 400
             
-        if db.session.query(File.query.filter(File.user == user_id).exists()).scalar():
+        if db.session.query(Task.query.filter(Task.user == user_id).exists()).scalar():
                 
-            tasks = File.query.filter(File.user == user_id)
+            tasks = Task.query.filter(Task.user == user_id)
 
-            if order == 1: tasks = tasks.order_by(desc(File.id))
-            elif order == 0: tasks = tasks.order_by(File.id)
+            if order == 1: tasks = tasks.order_by(desc(Task.id))
+            elif order == 0: tasks = tasks.order_by(Task.id)
 
             count = 1
             lista = []
@@ -254,10 +254,10 @@ class VistaTask(Resource):
         user = User.query.get(current_user)
         user_id = user.id
 
-        if db.session.query(File.query.filter(File.id == id_task,
-            File.user == user_id).exists()).scalar():
+        if db.session.query(Task.query.filter(Task.id == id_task,
+            Task.user == user_id).exists()).scalar():
 
-            return file_schema.dump(File.query.get_or_404(id_task))
+            return file_schema.dump(Task.query.get_or_404(id_task))
 
         else:
             return {'mensaje':'La tarea no existe para el usuario'}, 400
@@ -285,10 +285,10 @@ class VistaTask(Resource):
         if new_format not in FORMATOS:
                 return {'mensaje':'Error: Formato destino no valido (wav, ogg, mp3)'}, 400
 
-        if db.session.query(File.query.filter(File.id == id_task,
-            File.user == user_id).exists()).scalar():
+        if db.session.query(Task.query.filter(Task.id == id_task,
+            Task.user == user_id).exists()).scalar():
 
-            put_task = File.query.get(id_task)
+            put_task = Task.query.get(id_task)
 
             if new_format == put_task.newFormat:
                 return {'mensaje':'Error: Ya se solicito el cambio a ese formato'}, 200
@@ -336,10 +336,10 @@ class VistaTask(Resource):
         user = User.query.get(current_user)
         user_id = user.id
 
-        if db.session.query(File.query.filter(File.id == id_task,
-            File.user == user_id).exists()).scalar():
+        if db.session.query(Task.query.filter(Task.id == id_task,
+            Task.user == user_id).exists()).scalar():
 
-            task_delete = File.query.get(id_task)
+            task_delete = Task.query.get(id_task)
 
             try:
                 os.remove(task_delete.pathOriginal)
@@ -367,11 +367,11 @@ class VistaFiles(Resource):
         user = User.query.get(current_user)
         user_id = user.id
 
-        if db.session.query(File.query.filter(File.fileName.contains(fileName),
-            File.user == user_id).exists()).scalar():
+        if db.session.query(Task.query.filter(Task.fileName.contains(fileName),
+            Task.user == user_id).exists()).scalar():
 
-            task_consulta = File.query.filter(File.fileName.contains(fileName),
-            File.user == user_id).order_by(File.id.desc()).first()
+            task_consulta = Task.query.filter(Task.fileName.contains(fileName),
+            Task.user == user_id).order_by(Task.id.desc()).first()
 
             if task_consulta.status == 'processed':
                 try:

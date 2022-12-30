@@ -5,10 +5,10 @@ from datetime import datetime
 
 db = SQLAlchemy()
   
-class File(db.Model):
+class Task(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     timeStamp = db.Column(db.String(256), nullable = False)
-    fileName = db.Column(db.String(256), nullable = False)
+    taskName = db.Column(db.String(256), nullable = False)
     newFormat = db.Column(db.String(3), nullable = False)
     status = db.Column(db.String(10), default = 'uploaded')
     pathOriginal = db.Column(db.String(1024), nullable = False)
@@ -20,7 +20,7 @@ class User(db.Model):
     username = db.Column(db.String(50))
     password = db.Column(db.String(128))
     email = db.Column(db.String(128))
-    files = db.relationship('File', cascade='all, delete, delete-orphan')
+    tasks = db.relationship('Task', cascade='all, delete, delete-orphan')
 
 class UserSchema(SQLAlchemySchema):
     class Meta:
@@ -33,16 +33,16 @@ class UserSchema(SQLAlchemySchema):
     username = fields.String()
     email = fields.String()
 
-class FileSchema(SQLAlchemySchema):
+class TaskSchema(SQLAlchemySchema):
     class Meta:
-        model = File
+        model = Task
         include_relationships = True
         include_fk = True
         load_instance = True
 
     id = fields.Integer()
     timeStamp = fields.String()
-    fileName = fields.String()
+    taskName = fields.String()
     newFormat = fields.String()
     status = fields.String()
     user = fields.Integer()

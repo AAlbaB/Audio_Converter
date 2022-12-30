@@ -5,7 +5,7 @@ from pydub import AudioSegment
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from dotenv import load_dotenv
-from api.modelos import File, User
+from api.models import Task, User
 from api.utils import send_email
 
 PATH_LOGIN = os.getcwd() + '/logs/log_login.txt'
@@ -25,7 +25,7 @@ def registrar_log(usuario, fecha):
 @celery_app.task(name = 'convert_music')
 def convert_music(origin_path, dest_path, origin_format, new_format, name_file, task_id):
 
-    new_task = session.query(File).get(task_id)
+    new_task = session.query(Task).get(task_id)
 
     if origin_format == "mp3":
         sound = AudioSegment.from_mp3(origin_path)
