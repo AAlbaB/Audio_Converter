@@ -5,8 +5,10 @@ from dotenv import load_dotenv
 from flask import request
 from flask_restful import Resource
 from flask_jwt_extended import create_access_token, jwt_required
+from argon2.exceptions import VerifyMismatchError
+from marshmallow.exceptions import ValidationError
 from ..models import db, User, UserSchema
-from ..utils import validate_password
+from ..utils import validate_password, encryptPassword, checkPassword
 
 load_dotenv()
 celery_app = Celery('__name__', broker = os.getenv('BROKER_URL'))
@@ -63,7 +65,6 @@ class VistaSignUp(Resource):
         user_username = User.query.filter(User.username == request.json['username']).first()
         user_email = User.query.filter(User.email == request.json['email']).first()
 
-        #TODO: Encriptar contraseñas
         first_pass = request.json['password']
         second_pass = request.json['password_again']
 
@@ -81,8 +82,8 @@ class VistaSignUp(Resource):
 
         try:
             new_user = User(username = request.json['username'], 
-                            password = request.json['password'], 
-                            email =request.json['email'])
+                            password = encryptPassword(request.json['password']), 
+                            email = request.json['email'])
                         
             db.session.add(new_user)
             db.session.commit()
@@ -91,8 +92,8 @@ class VistaSignUp(Resource):
                     'id': new_user.id, 'usuario': new_user.username, 
                     'email': new_user.email}, 200
 
-        except:
-                return {'mensaje': 'A ocurrido un error, por favor vuelve a intentar'}, 503
+        except Exception as e:
+                return {'mensaje': 'A ocurrido un error, por favor vuelve a intentar', 'error': str(e)}, 503
                                
 class VistaLogIn(Resource):
 
@@ -101,17 +102,19 @@ class VistaLogIn(Resource):
         # Endpoint http://localhost:5000/api/auth/login
 
         try:
-            usuario = User.query.filter(User.username == request.json['username'],
-                                        User.password == request.json['password']).first()
+            usuario = User.query.filter(User.username == request.json['username']).first()
 
-            if usuario:
-                args = (request.json['username'], datetime.utcnow())
-                registrar_log.apply_async(args = args)
-                token_de_acceso = create_access_token(identity = usuario.id)
-                return {'mensaje':'Inicio de sesión exitoso', 'token': token_de_acceso}, 200
-                            
-            else:
-                return {'mensaje':'Nombre de usuario o contraseña incorrectos'}, 401
-            
-        except Exception as e:
+            if usuario is None:
+                return {'mensaje':'El usuario no existe'}, 404
+
+            checkPassword(usuario.password, request.json['password'])
+            args = (request.json['username'], datetime.utcnow())
+            registrar_log.apply_async(args = args)
+            token_de_acceso = create_access_token(identity = usuario.id)
+            return {'mensaje':'Inicio de sesión exitoso', 'token': token_de_acceso}, 200
+                          
+        except ValidationError as e:
             return {'mensaje': 'A ocurrido un error, por favor vuelve a intentar', 'error': str(e)}, 503
+            
+        except VerifyMismatchError as e:
+            return {'mensaje':'La contraseña es incorrecta'}, 404
