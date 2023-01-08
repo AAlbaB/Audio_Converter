@@ -9,6 +9,7 @@ venv/
 
 #Archvivos temporales
 *.pyc
+*.rdb
 
 #Logs
 log_login.txt
