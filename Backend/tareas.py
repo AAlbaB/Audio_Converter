@@ -1,4 +1,5 @@
 import os
+import logging
 from datetime import datetime
 from celery import Celery
 from pydub import AudioSegment
@@ -19,8 +20,8 @@ session = Session()
 
 @celery_app.task(name = 'registrar_login')
 def registrar_log(usuario, fecha):
-    with open(PATH_LOGIN, 'a+') as file:
-        file.write('El usuario: {} - Inicio sesion: {}\n'.format(usuario, fecha))
+    log_login.info('El usuario: {}, ha iniciado sesion'.format(usuario))
+    print('-> El usuario: {}, ha iniciado sesión: {}'.format(usuario, fecha))
 
 @celery_app.task(name = 'convert_music')
 def convert_music(origin_path, dest_path, origin_format, new_format, name_file, task_id):
@@ -67,7 +68,17 @@ def registrar_conversion(id_task, mensaje, fecha):
     with open(PATH_CONVERT, 'a+') as file:
         file.write('Para la tarea con Id: {}, Se registro: {} - Con fecha: {}\n'.format(id_task, mensaje, fecha))
 
+def setup_logger(name, log_file, level=logging.INFO):
 
+    formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+    handler = logging.FileHandler(log_file)        
+    handler.setFormatter(formatter)
 
-    
+    logger = logging.getLogger(name)
+    logger.setLevel(level)
+    logger.addHandler(handler)
+
+    return logger
+
+log_login = setup_logger('log_login', PATH_LOGIN)
 

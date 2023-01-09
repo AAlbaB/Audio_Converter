@@ -1,0 +1,19 @@
+# Este archivo de docker compose es cuando no se tiene isntalado Postgres en el equipo
+version: '3.1'
+
+services:
+  mydb:
+    container_name: postgres            
+    image: postgres                     
+    volumes:
+      - postgresdb:/var/lib/postgresql  
+    ports:                               
+      - 5432:5432                       
+    environment:                        
+      POSTGRES_USER: postgres          
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: postgres
+
+volumes:                               
+  postgresdb:
+    driver: local
