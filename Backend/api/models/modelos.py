@@ -17,10 +17,27 @@ class Task(db.Model):
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key = True)
-    username = db.Column(db.String(50))
-    password = db.Column(db.String(128))
-    email = db.Column(db.String(128))
+    username = db.Column(db.String(50), nullable = False)
+    password = db.Column(db.String(128), nullable = False)
+    email = db.Column(db.String(128), nullable = False)
     tasks = db.relationship('Task', cascade='all, delete, delete-orphan')
+
+class Login(db.Model):
+    id = db.Column(db.Integer, primary_key = True)
+    timeStamp = db.Column(db.String(50), nullable = False)
+    username = db.Column(db.String(50), nullable = False)
+    message = db.Column(db.String(256), nullable = False)
+
+class LoginSchema(SQLAlchemySchema):
+    class Meta:
+        model = Login
+        include_fk = True
+        load_instance = True
+
+    id = fields.Integer()
+    timeStamp = fields.String()
+    username = fields.String()
+    message = fields.String()
 
 class UserSchema(SQLAlchemySchema):
     class Meta:

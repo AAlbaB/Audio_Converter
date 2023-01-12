@@ -6,7 +6,7 @@ from pydub import AudioSegment
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from dotenv import load_dotenv
-from api.models import Task, User
+from api.models import Task, User, Login
 from api.utils import send_email
 
 PATH_LOGIN = os.getcwd() + '/logs/log_login.txt'
@@ -15,6 +15,7 @@ PATH_CONVERT = os.getcwd() + '/logs/log_convert.txt'
 load_dotenv()
 celery_app = Celery('__name__', broker = os.getenv('BROKER_URL'))
 load_engine = create_engine(os.getenv('DATABASE_URL'))
+write_bd = os.getenv('WRITE_LOGIN_BD')
 Session = sessionmaker(bind = load_engine)
 session = Session()
 
@@ -22,6 +23,18 @@ session = Session()
 def registrar_log(usuario, fecha):
     log_login.info('El usuario: {}, ha iniciado sesion'.format(usuario))
     print('-> El usuario: {}, ha iniciado sesión: {}'.format(usuario, fecha))
+
+    if write_bd == 'True':
+        try:
+            new_login = Login(timeStamp = fecha, username = usuario, 
+                            message = 'El usuario ha iniciado sesión exitosamente')
+
+            session.add(new_login)
+            session.commit()
+            print('-> Registro agregado exitosamente en BD')
+            
+        except Exception as e:
+            print('-> Ha ocurrido un error registrando el login en BD, {}'.format(e))
 
 @celery_app.task(name = 'convert_music')
 def convert_music(origin_path, dest_path, origin_format, new_format, name_file, task_id):

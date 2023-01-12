@@ -15,14 +15,15 @@ Para el correcto funcionamiento del programa, se debe crear un ambiente virtual 
 
 ### Correr programa
 **Importante:** Verificar que el entorno virtual este activado y verificar las conexiones a base de datos en el archivo .env
-1. En una consola desde la carpeta Backend: `celery -A tareas worker -l info`
-2. En caso de que no funcione celery, se debe tener otra consola corriendo redis: `redis-server`
-3. Si no hubo problemas con la instalación de redis, se puede usar un contenedor de docker con: `docker run --name redis-container -p 6379:6379 -d redis`
-4. En una consola desde la carpeta Backend: `flask run` 
+1. Si hubo problemas con la instalación de redis, se puede usar un contenedor de docker con: `docker run --name redis-container -p 6379:6379 -d redis`
+2. El proyecto usa a una base de datos Posgres, en caso de no tenerlo configurado en el equipo, se puede usar Docker Compose en la ruta: `Audio_Converter/Backend/database`  y usar el comando: `docker compose up -d`, para asi levantar un contenedor de Postgres
+3. Si se instaló redis adecuadamente pero no ejecuta, se debe abrir una consola y usar: `redis-server`
+4. En una consola desde la carpeta Backend: `celery -A worker.tareas worker -l info`
+5. En una consola desde la carpeta Backend: `flask run` 
 
 ## Ejecutar aplicacion en Windows (Local)
 Primero se debe realizar la instalación de algunos programas, para ello revisar el README de la raiz del proyecto.
-Para la cuarta entrega entrega, se puede utilizar Windows, para esto seguir las siguientes instrucciones:
+Para el correcto funcionamiento del programa, se debe crear un ambiente virtual e instalar unos paquetes
 
 ### Preparar ambiente virutal (Estar en carpeta Backend)
 1. Crear ambiente virtual en carpeta Backend: `python -m venv venv`
@@ -33,6 +34,7 @@ Para la cuarta entrega entrega, se puede utilizar Windows, para esto seguir las 
 
 ### Correr programa
 **Importante:** Verificar que el entorno virtual este activado y verificar las conexiones a base de datos en el archivo .env
-1. Para Windows en necesario tener corriendo con Docker en el puerto 6379, debido a que Redis no esta soportado para Windows, se puede usar con el comando de Docker: `docker run --name redis-container -p 6379:6379 -d redis`
-2. En una consola desde la carpeta Backend: `celery -A tareas worker -l info`
-3. En una consola desde la carpeta Backend: `flask run` 
+1. Para Windows en necesario tener corriendo en el puerto **6379** Redis, se puede usar con el comando de Docker: `docker run --name redis-container -p 6379:6379 -d redis`
+2. El proyecto usa a una base de datos Posgres, en caso de no tenerlo configurado en el equipo, se puede usar Docker Compose en la ruta: `Audio_Converter/Backend/database`  y usar el comando: `docker compose up -d`, para asi levantar un contenedor de Postgres
+3. En una consola desde la carpeta Backend: `celery -A worker.tareas worker -l info --pool=solo`
+4. En una consola desde la carpeta Backend: `flask run` 
