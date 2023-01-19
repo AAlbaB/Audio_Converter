@@ -25,7 +25,7 @@ class VistaTasksUser(Resource):
 
     @jwt_required()
     def post(self):
-        # Crea una nueva tarea de conversion a un usario autenticado
+        # Crea una nueva tarea de conversion a un usuario autenticado
         # Endpoint http://localhost:5000/api/tasks
 
         current_user = get_jwt_identity()
