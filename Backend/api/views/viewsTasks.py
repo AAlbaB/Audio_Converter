@@ -77,26 +77,30 @@ class VistaTasksUser(Resource):
             try:
                 file.save(path_origen)
             except:
-                return {'mensaje':'Error: al almacenar archivo original'}
+                return {'mensaje':'Error al almacenar archivo original'}
 
-            new_task = Task(timeStamp = date_actual,
-                            fileName = file_origen, 
-                            newFormat = new_format,
-                            pathOriginal = path_origen,
-                            pathConvertido = path_destino)
+            try: 
+                new_task = Task(timeStamp = date_actual,
+                                taskName = file_origen, 
+                                newFormat = new_format,
+                                pathOriginal = path_origen,
+                                pathConvertido = path_destino)
 
-            user = User.query.get_or_404(user_id)
-            user.files.append(new_task)
-            db.session.commit()
+                user = User.query.get_or_404(user_id)
+                user.tasks.append(new_task)
+                db.session.commit()
 
-            task_id = new_task.id
-            args = (path_origen, path_destino, old_format, new_format, file_origen, task_id)
-            convert_music.apply_async(args = args)
+                task_id = new_task.id
+                args = (path_origen, path_destino, old_format, new_format, file_origen, task_id)
+                convert_music.apply_async(args = args)
 
-            return file_schema.dump(new_task)
+                return file_schema.dump(new_task)
+
+            except:
+                return {'mensaje':'Error al convertir el archivo'}, 500 
 
         else:
-            return {'mensaje':'Erro: Autenticar usuario'}, 400
+            return {'mensaje':'Error Autenticar usuario'}, 401
         
     @jwt_required()
     def get(self):
@@ -124,15 +128,20 @@ class VistaTasksUser(Resource):
 
             count = 1
             lista = []
-            for ta in tasks:
-                lista.append({'id': ta.id, 'timeStamp': ta.timeStamp,
-                        'fileName': ta.fileName, 'newFormat': ta.newFormat,
-                        'status': ta.status})
 
-                if count >= max: break
-                else: count += 1
+            try:
+                for ta in tasks:
+                    lista.append({'id': ta.id, 'timeStamp': ta.timeStamp,
+                            'taskName': ta.taskName, 'newFormat': ta.newFormat,
+                            'status': ta.status})
 
-            return lista
+                    if count >= max: break
+                    else: count += 1
+
+                return lista
+            
+            except:
+                return {'mensaje':'Error al listar las tareas del usuario'}, 500
             
         else: 
             return {'mensaje':'El usuario {} no tiene tareas registradas'.format(user_id)}, 400
@@ -148,13 +157,17 @@ class VistaTask(Resource):
         user = User.query.get(current_user)
         user_id = user.id
 
-        if db.session.query(Task.query.filter(Task.id == id_task,
-            Task.user == user_id).exists()).scalar():
+        try:
+            if db.session.query(Task.query.filter(Task.id == id_task,
+                Task.user == user_id).exists()).scalar():
 
-            return file_schema.dump(Task.query.get_or_404(id_task))
+                return file_schema.dump(Task.query.get_or_404(id_task))
 
-        else:
-            return {'mensaje':'La tarea no existe para el usuario'}, 400
+            else:
+                return {'mensaje':'La tarea no existe para el usuario'}, 400
+
+        except:
+            return {'mensaje':'Error al encontrar la tarea del usuario'}, 500
 
     @jwt_required()
     def put(self, id_task):
@@ -189,7 +202,7 @@ class VistaTask(Resource):
 
             date_actual = datetime.now()
             date_actual = date_actual.strftime('%d%m%Y%H%M%S')
-            file_origen = put_task.fileName
+            file_origen = put_task.taskName
 
             old_format = file_origen.split('.')[-1].lower()
             name_origen = file_origen.split('.')[0].split('_')[-1]
