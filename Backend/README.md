@@ -2,10 +2,8 @@
 En esta serie de instrucciones, se podrá ejecutar la aplicación de forma local en los sistemas operativos **Linux-Ubuntu** y **Windows**
 
 ## Contenedores de Docker
-La aplicación requiere de dos servicios **Redis** y **Postgres**, los cuales pueden ser usados mediante contenedores de Docker, estos serán validos para cualquier sistema operativo
+La aplicación requiere del servicio **Redis**, el cual puede ser usado mediante contenedores de Docker, estos serán validos para cualquier sistema operativo
 1. Para crear el contenedor para Redis: `docker run --name redis-container -p 6379:6379 -d redis`
-2. Para crear el contenedor para Postgres, se debe estar en la ruta: `Audio_Converter/Backend/database` y usar el comando: `docker compose up -d` (Aún no verificado)
-3. Si se tiene instalado Postgres en el equipo, se debe ejecutar los siguientes Scripts para crear la base de datos y tablas (Implementar)
 
 ## Ejecutar aplicación en Ubuntu (Local)
 Primero se debe realizar la instalación de algunos programas, para ello revisar el README de la raíz del proyecto.
