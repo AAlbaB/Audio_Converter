@@ -23,7 +23,7 @@ Para el correcto funcionamiento del programa, se debe crear un ambiente virtual 
 **Importante:** Verificar que el entorno virtual este activado, verificar las conexiones a base de datos en el archivo *.env* y verificar que los contenedores (Si se utilizaron, estén funcionando adecuadamente)
 1. Si se instaló redis adecuadamente pero no ejecuta, se debe abrir una consola y usar: `redis-server`
 4. En una consola desde la carpeta Backend: `celery -A worker.tareas worker -l info`
-5. En una consola desde la carpeta Backend: `flask run` 
+5. En una consola desde la carpeta Backend: `flask run -p 3000` 
 
 ## Ejecutar aplicación en Windows (Local)
 Primero se debe realizar la instalación de algunos programas, para ello revisar el README de la raíz del proyecto.
@@ -39,4 +39,4 @@ Para el correcto funcionamiento del programa, se debe crear un ambiente virtual 
 ### Correr programa
 **Importante:** Verificar que el entorno virtual este activado, verificar las conexiones a base de datos en el archivo *.env* y verificar que los contenedores (Si se utilizaron, estén funcionando adecuadamente)
 1. En una consola desde la carpeta Backend: `celery -A worker.tareas worker -l info --pool=solo`
-2. En una consola desde la carpeta Backend: `flask run` 
+2. En una consola desde la carpeta Backend: `flask run -p 3000` 

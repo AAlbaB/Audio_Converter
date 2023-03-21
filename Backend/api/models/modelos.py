@@ -1,7 +1,6 @@
 from marshmallow_sqlalchemy import SQLAlchemySchema
-from marshmallow import fields, Schema
+from marshmallow import fields
 from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime
 
 db = SQLAlchemy()
   

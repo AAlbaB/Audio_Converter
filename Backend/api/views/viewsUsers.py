@@ -23,7 +23,7 @@ class VistaUsers(Resource):
 
     def get(self):
         # Retorna todos los usuarios registrados
-        # Endpoint http://localhost:5000/api/users
+        # Endpoint http://localhost:3000/api/users
 
         return [user_schema.dump(user) for user in User.query.all()]
 
@@ -32,14 +32,14 @@ class VistaUser(Resource):
     @jwt_required()
     def get(self, id_user):
         # Retorna un usuario por su id
-        # Endpoint http://localhost:5000/api/users/id_user
+        # Endpoint http://localhost:3000/api/users/id_user
 
         return user_schema.dump(User.query.get_or_404(id_user))
 
     @jwt_required()
     def put(self, id_user):
         # Actualiza la contraseña de un usuario por su id
-        # Endpoint http://localhost:5000/api/users/id_user
+        # Endpoint http://localhost:3000/api/users/id_user
 
         user = User.query.get_or_404(id_user)
         user.password = request.json.get('password', user.password)
@@ -49,7 +49,7 @@ class VistaUser(Resource):
     @jwt_required()
     def delete(self, id_user):
         # Elimina un usuario por su id
-        # Endpoint http://localhost:5000/api/users/id_user
+        # Endpoint http://localhost:3000/api/users/id_user
 
         user = User.query.get_or_404(id_user)
         db.session.delete(user)
@@ -60,7 +60,7 @@ class VistaSignUp(Resource):
 
     def post(self):
         # Crea un usuario en la aplicacion
-        # Endpoint http://localhost:5000/api/auth/signup
+        # Endpoint http://localhost:3000/api/auth/signup
 
         user_username = User.query.filter(User.username == request.json['username']).first()
         user_email = User.query.filter(User.email == request.json['email']).first()
@@ -99,7 +99,7 @@ class VistaLogIn(Resource):
 
     def post(self):
         # Loguea un usuario en la aplicacion
-        # Endpoint http://localhost:5000/api/auth/login
+        # Endpoint http://localhost:3000/api/auth/login
 
         try:
             usuario = User.query.filter(User.username == request.json['username']).first()

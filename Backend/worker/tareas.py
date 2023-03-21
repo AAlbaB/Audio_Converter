@@ -1,6 +1,5 @@
 import os
 import logging
-from datetime import datetime
 from celery import Celery
 from pydub import AudioSegment
 from sqlalchemy import create_engine
@@ -9,12 +8,13 @@ from dotenv import load_dotenv
 from api.models import Task, User, Login
 from api.utils import send_email
 
-PATH_LOGIN = os.getcwd() + '/logs/log_login.txt'
-PATH_CONVERT = os.getcwd() + '/logs/log_convert.txt'
+PATH_LOGIN = os.getcwd() + '/logs/log_login.log'
+PATH_CONVERT = os.getcwd() + '/logs/log_convert.log'
+DATABASE_URL = os.getenv('DATABASE_URL', 'sqlite:///audio_converter.db')
 
 load_dotenv()
 celery_app = Celery('__name__', broker = os.getenv('BROKER_URL'))
-load_engine = create_engine(os.getenv('DATABASE_URL'))
+load_engine = create_engine(DATABASE_URL)
 write_bd = os.getenv('WRITE_LOGIN_BD')
 send_email = os.getenv('SEND_EMAIL')
 
@@ -39,34 +39,18 @@ def registrar_log(usuario, fecha):
             print('-> Ha ocurrido un error registrando el login en BD, {}'.format(e))
 
 @celery_app.task(name = 'convert_music')
-def convert_music(origin_path, dest_path, origin_format, new_format, name_file, task_id):
+def convert_music(path_original, path_convertido, old_format, new_format,  task_name, task_id):
 
     try:
         new_task = session.query(Task).get(task_id)
 
-        if origin_format == "mp3":
-            sound = AudioSegment.from_mp3(origin_path)
-            sound.export(dest_path, format = new_format)
-            new_task.status = 'processed'
-            session.commit()
+        sound = AudioSegment.from_file(path_original, format = old_format)
+        sound.export(path_convertido, format = new_format)
+        new_task.status = 'processed'
+        session.commit()
 
-        elif origin_format == "ogg":
-            sound = AudioSegment.from_ogg(origin_path)
-            sound.export(dest_path, format = new_format)
-            new_task.status = 'processed'
-            session.commit()
-
-        elif origin_format == "wav":
-            sound = AudioSegment.from_wav(origin_path)
-            sound.export(dest_path, format = new_format)
-            new_task.status = 'processed'
-            session.commit()
-
-        else:
-            print ('No se proporciono una extension valida {}'.format(name_file))
-
-        print ('-> El audio {}, se convirtio a : {}'.format(name_file, new_format))
-        mensaje = 'El audio {}, se convirtio a : {}'.format(name_file, new_format)
+        print ('-> El audio {}, se convirtio a : {}'.format( task_name, new_format))
+        mensaje = 'El audio {}, se convirtio a : {}'.format( task_name, new_format)
 
     except Exception as e:
         print ('\n-> A ocurrido un error convirtiendo el archivo ' + str(e))

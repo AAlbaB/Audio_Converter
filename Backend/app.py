@@ -1,19 +1,12 @@
-import os
-from flask import Flask
+from Backend import create_app
 from flask_cors import CORS
 from flask_restful import Api
 from flask_jwt_extended import JWTManager
-from dotenv import load_dotenv 
-from api.models import db
-from api.views import VistaUser, VistaUsers, VistaSignUp, VistaLogIn, \
-                        VistaTask, VistaTasksUser, VistaFiles
+from Backend.api.models import db
+from Backend.api.views import VistaUser, VistaUsers, VistaSignUp, VistaLogIn, \
+    VistaTask, VistaTasksUser, VistaFiles
 
-load_dotenv()
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['JWT_SECRET_KEY'] = 'frase-secreta'
-app.config['PROPAGATE_EXCEPTIONS'] = True  
+app = create_app('default')
 app_context = app.app_context()
 app_context.push()
 
@@ -33,4 +26,4 @@ api.add_resource(VistaFiles, '/api/files/<string:taskName>')
 jwt = JWTManager(app)
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0')
+    app.run(host='127.0.0.1', port=3000, debug=True)

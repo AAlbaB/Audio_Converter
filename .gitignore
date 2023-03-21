@@ -12,5 +12,5 @@ venv/
 *.rdb
 
 #Logs
-log_login.txt
-log_convert.txt
+log_login.log
+log_convert.log

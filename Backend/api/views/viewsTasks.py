@@ -26,7 +26,7 @@ class VistaTasksUser(Resource):
     @jwt_required()
     def post(self):
         # Crea una nueva tarea de conversion a un usuario autenticado
-        # Endpoint http://localhost:5000/api/tasks
+        # Endpoint http://localhost:3000/api/tasks
 
         current_user = get_jwt_identity()
         user = User.query.get(current_user)
@@ -68,30 +68,30 @@ class VistaTasksUser(Resource):
             date_actual = datetime.now()
             date_actual = date_actual.strftime('%d%m%Y%H%M%S')
 
-            file_origen = f'{user_name}_{date_actual}_{converter_file}'.replace(' ','_')
-            path_origen = f'{RUTA_ORIGINALES}/{file_origen}'
+            task_name = f'{user_name}_{date_actual}_{converter_file}'.replace(' ','_')
+            path_original = f'{RUTA_ORIGINALES}/{task_name}'
 
             file_destino = f'{user_name}_{date_actual}_{base_file}.{new_format}'.replace(' ','_')
-            path_destino = f'{RUTA_CONVERTIDA}/{file_destino}'
+            path_convertido = f'{RUTA_CONVERTIDA}/{file_destino}'
 
             try:
-                file.save(path_origen)
+                file.save(path_original)
             except:
                 return {'mensaje':'Error al almacenar archivo original'}
 
             try: 
                 new_task = Task(timeStamp = date_actual,
-                                taskName = file_origen, 
+                                taskName = task_name, 
                                 newFormat = new_format,
-                                pathOriginal = path_origen,
-                                pathConvertido = path_destino)
+                                pathOriginal = path_original,
+                                pathConvertido = path_convertido)
 
                 user = User.query.get_or_404(user_id)
                 user.tasks.append(new_task)
                 db.session.commit()
 
                 task_id = new_task.id
-                args = (path_origen, path_destino, old_format, new_format, file_origen, task_id)
+                args = (path_original, path_convertido, old_format, new_format, task_name, task_id)
                 convert_music.apply_async(args = args)
 
                 return file_schema.dump(new_task)
@@ -105,7 +105,7 @@ class VistaTasksUser(Resource):
     @jwt_required()
     def get(self):
         # Retorna todas las tareas de un usuario con parametros
-        # Endpoint http://localhost:5000/api/tasks?max=100&order=0
+        # Endpoint http://localhost:3000/api/tasks?max=100&order=0
         
         current_user = get_jwt_identity()
         user = User.query.get(current_user)
@@ -151,7 +151,7 @@ class VistaTask(Resource):
     @jwt_required()
     def get(self, id_task):
         # Retorna la tarea con id asigando
-        # Endpoint http://localhost:5000/api/tasks/id_task
+        # Endpoint http://localhost:3000/api/tasks/id_task
 
         current_user = get_jwt_identity()
         user = User.query.get(current_user)
@@ -172,7 +172,7 @@ class VistaTask(Resource):
     @jwt_required()
     def put(self, id_task):
         # Actualiza la tarea con id asigando
-        # Endpoint http://localhost:5000/api/tasks/id_task
+        # Endpoint http://localhost:3000/api/tasks/id_task
 
         current_user = get_jwt_identity()
         user = User.query.get(current_user)
@@ -202,28 +202,28 @@ class VistaTask(Resource):
 
             date_actual = datetime.now()
             date_actual = date_actual.strftime('%d%m%Y%H%M%S')
-            file_origen = put_task.taskName
+            task_name = put_task.taskName
 
-            old_format = file_origen.split('.')[-1].lower()
-            name_origen = file_origen.split('.')[0].split('_')[-1]
+            old_format = task_name.split('.')[-1].lower()
+            name_origen = task_name.split('.')[0].split('_')[-1]
 
             if new_format == old_format:
                 return {'mensaje':'Error: El audio original ya tiene ese formato'}, 400
 
             file_destino = f'{user_name}_{date_actual}_{name_origen}.{new_format}'.replace(' ','_')
-            path_destino = f'{RUTA_CONVERTIDA}/{file_destino}'
+            path_convertido = f'{RUTA_CONVERTIDA}/{file_destino}'
 
             try:
                 if put_task.status == 'processed':
                     os.remove(put_task.pathConvertido)
 
                 put_task.newFormat = new_format
-                put_task.pathConvertido = path_destino
+                put_task.pathConvertido = path_convertido
                 put_task.status = 'uploaded'
                 db.session.commit()
 
                 task_id = put_task.id
-                args = (put_task.pathOriginal, path_destino, old_format, new_format, file_origen, task_id)
+                args = (put_task.pathOriginal, path_convertido, old_format, new_format, task_name, task_id)
                 convert_music.apply_async(args = args)
 
                 return {'mensaje':'La tarea fue actualizada para conversion'}, 200
@@ -237,7 +237,7 @@ class VistaTask(Resource):
     @jwt_required()
     def delete(self, id_task):
         # Elimina la tarea y archivos
-        # Endpoint http://localhost:5000/api/tasks/id_task
+        # Endpoint http://localhost:3000/api/tasks/id_task
 
         current_user = get_jwt_identity()
         user = User.query.get(current_user)

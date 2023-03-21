@@ -1,3 +1,4 @@
+autopep8==2.0.2
 argon2-cffi==21.3.0
 celery==5.2.7
 ffprobe==0.5
